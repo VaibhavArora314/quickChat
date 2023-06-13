@@ -11,7 +11,7 @@ import {
   Text,
   VStack,
 } from "@chakra-ui/react";
-import { GoogleIcon } from "../assets/icons/google";
+import { GoogleIcon } from "../icons/google";
 import { Link, useNavigate } from "react-router-dom";
 import {
   signInWithEmailAndPassword,

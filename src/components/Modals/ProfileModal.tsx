@@ -23,7 +23,7 @@ type IProfileModal = {
 };
 
 function ProfileModal({ isOpen, onClose }: IProfileModal) {
-  const [currentUser] = useContext(AuthContext);
+  const { currentUser } = useContext(AuthContext);
   const [username, setUsername] = useState(currentUser?.username);
   const [email, setEmail] = useState(currentUser?.email);
 
@@ -65,7 +65,7 @@ function ProfileModal({ isOpen, onClose }: IProfileModal) {
               mr={3}
               disabled
               _hover={{
-                cursor : "not-allowed",
+                cursor: "not-allowed",
               }}
             >
               Update

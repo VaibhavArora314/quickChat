@@ -1,4 +1,4 @@
-import React, {
+import {
   createContext,
   ReactNode,
   Dispatch,
@@ -33,7 +33,7 @@ export const ChatProvider: FC<IChatProvider> = ({ children }) => {
   const [chats, setChats] = useState<any>({});
   const [selectedChat, setSelectedChat] = useState("");
   const [loading, setLoading] = useState(true);
-  const [currentUser] = useContext(AuthContext);
+  const { currentUser } = useContext(AuthContext);
 
   useEffect(() => {
     if (currentUser && currentUser.uid) {

@@ -18,7 +18,7 @@ type ISettingsModal = {
 };
 
 function SettingsModal({ isOpen, onClose }: ISettingsModal) {
-    const { colorMode, toggleColorMode } = useColorMode()
+  const { colorMode, toggleColorMode } = useColorMode();
 
   return (
     <>
@@ -29,14 +29,15 @@ function SettingsModal({ isOpen, onClose }: ISettingsModal) {
           <ModalCloseButton />
           <ModalBody>
             <Flex justifyContent="space-between">
-
-            Dark Mode
-            <Switch id="darkMode" isChecked={colorMode === "dark"} onChange={toggleColorMode} />
+              Dark Mode
+              <Switch
+                id="darkMode"
+                isChecked={colorMode === "dark"}
+                onChange={toggleColorMode}
+              />
             </Flex>
           </ModalBody>
-          <ModalFooter>
-            {/* <Button onClick={onClose}>Close</Button> */}
-          </ModalFooter>
+          <ModalFooter></ModalFooter>
         </ModalContent>
       </Modal>
     </>

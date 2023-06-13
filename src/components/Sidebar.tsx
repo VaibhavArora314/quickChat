@@ -25,7 +25,7 @@ const Sidebar = ({
   onOpenProfile,
   onOpenNewChat,
 }: ISidebar) => {
-  const [currentUser] = useContext(AuthContext);
+  const { currentUser } = useContext(AuthContext);
   const { chats, selectedChat, setSelectedChat } = useContext(ChatContext);
 
   return (

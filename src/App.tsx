@@ -8,11 +8,7 @@ import AuthContext from "./context/AuthContext";
 import { Navigate } from "react-router-dom";
 import { ChatProvider } from "./context/ChatContext";
 
-// TODO: create ChatContext which contains chats,selectedChatt,setSelectedChat
-
 function App() {
-  // const [currentUser] = useContext(AuthContext);
-
   return (
     <>
       <Routes>
@@ -54,7 +50,7 @@ type Props = {
 };
 
 const ProtectedRoute = ({ children }: Props) => {
-  const [currentUser] = useContext(AuthContext);
+  const { currentUser } = useContext(AuthContext);
 
   if (currentUser === null) return <Navigate to="/sign-in" />;
 
@@ -62,7 +58,7 @@ const ProtectedRoute = ({ children }: Props) => {
 };
 
 const NonProtectedRoute = ({ children }: Props) => {
-  const [currentUser] = useContext(AuthContext);
+  const { currentUser } = useContext(AuthContext);
 
   if (currentUser?.uid) return <Navigate to="/" />;
 

@@ -11,7 +11,7 @@ import {
   Text,
   VStack,
 } from "@chakra-ui/react";
-import { GoogleIcon } from "../assets/icons/google";
+import { GoogleIcon } from "../icons/google";
 import { Link } from "react-router-dom";
 import {
   createUserWithEmailAndPassword,
@@ -44,7 +44,7 @@ const SignUp = ({}: ISignUp) => {
   });
   const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
-  const [currentUser, setCurrentUser] = useContext(AuthContext);
+  const { setCurrentUser } = useContext(AuthContext);
 
   const handleSubmit = async () => {
     const updatedErrors = validateRegisterCredentials(

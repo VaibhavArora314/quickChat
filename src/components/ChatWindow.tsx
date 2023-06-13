@@ -28,7 +28,7 @@ type IChatWindow = {};
 const ChatWindow = ({}: IChatWindow) => {
   const { chats, selectedChat } = useContext(ChatContext);
   const [messages, setMessages] = useState<any>([]);
-  const [currentUser] = useContext(AuthContext);
+  const { currentUser } = useContext(AuthContext);
   const ref = createRef<HTMLDivElement>();
 
   useEffect(() => {
@@ -144,7 +144,7 @@ type IBottomBar = {
 const BottomBar = ({ onSend }: IBottomBar) => {
   const [text, setText] = useState("");
   const { chats, selectedChat } = useContext(ChatContext);
-  const [currentUser] = useContext(AuthContext);
+  const { currentUser } = useContext(AuthContext);
 
   const handleSend = async () => {
     try {

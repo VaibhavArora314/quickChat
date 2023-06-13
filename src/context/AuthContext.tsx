@@ -1,5 +1,5 @@
 import { onAuthStateChanged } from "firebase/auth";
-import React, {
+import {
   createContext,
   ReactNode,
   Dispatch,
@@ -17,13 +17,19 @@ type IUser = {
   photoURL: string;
 };
 
-type IAuthContext = [IUser | null, Dispatch<SetStateAction<IUser | null>>];
+type IAuthContext = {
+  currentUser: IUser | null;
+  setCurrentUser: Dispatch<SetStateAction<IUser | null>>;
+};
 
 type IAuthProvider = {
   children: ReactNode;
 };
 
-const AuthContext = createContext<IAuthContext>([null, () => {}]);
+const AuthContext = createContext<IAuthContext>({
+  currentUser: null,
+  setCurrentUser: () => {},
+});
 AuthContext.displayName = "AuthContext";
 
 export const AuthProvider: FC<IAuthProvider> = ({ children }) => {
@@ -55,7 +61,7 @@ export const AuthProvider: FC<IAuthProvider> = ({ children }) => {
   if (loading) return;
 
   return (
-    <AuthContext.Provider value={[currentUser, setCurrentUser]}>
+    <AuthContext.Provider value={{ currentUser, setCurrentUser }}>
       {children}
     </AuthContext.Provider>
   );

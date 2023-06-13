@@ -45,7 +45,7 @@ interface IUser {
 function NewChatModal({ isOpen, onClose }: INewChatModal) {
   const [users, setUsers] = useState<IUser[]>([]);
   const [searchText, setSearchText] = useState("");
-  const [currentUser] = useContext(AuthContext);
+  const { currentUser } = useContext(AuthContext);
   const { setSelectedChat } = useContext(ChatContext);
 
   const getUsersByUsername = async (searchName: string) => {
