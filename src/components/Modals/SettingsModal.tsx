@@ -11,13 +11,13 @@ import {
   useColorMode,
 } from "@chakra-ui/react";
 
-type Props = {
+type ISettingsModal = {
   isOpen: boolean;
   onOpen: () => void;
   onClose: () => void;
 };
 
-function SettingsModal({ isOpen, onClose }: Props) {
+function SettingsModal({ isOpen, onClose }: ISettingsModal) {
     const { colorMode, toggleColorMode } = useColorMode()
 
   return (

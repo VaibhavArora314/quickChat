@@ -1,18 +1,86 @@
 import {
   Input,
-  Avatar,
   Flex,
   Heading,
   FormControl,
   Button,
   useColorModeValue,
+  Image,
 } from "@chakra-ui/react";
 import ChatBubble from "./ChatBubble";
 import { AiOutlineSend } from "react-icons/ai";
+import { createRef, useContext, useEffect, useState } from "react";
+import ChatContext from "../context/ChatContext";
+import {
+  Timestamp,
+  arrayUnion,
+  doc,
+  onSnapshot,
+  serverTimestamp,
+  updateDoc,
+} from "firebase/firestore";
+import { db } from "../firebase";
+import { v4 as uuid } from "uuid";
+import AuthContext from "../context/AuthContext";
 
-type Props = {};
+type IChatWindow = {};
 
-const ChatWindow = ({}: Props) => {
+const ChatWindow = ({}: IChatWindow) => {
+  const { chats, selectedChat } = useContext(ChatContext);
+  const [messages, setMessages] = useState<any>([]);
+  const [currentUser] = useContext(AuthContext);
+  const ref = createRef<HTMLDivElement>();
+
+  useEffect(() => {
+    if (selectedChat && Object.keys(chats).includes(selectedChat)) {
+      const unSub = onSnapshot(doc(db, "chats", selectedChat), (doc) => {
+        if (doc.exists()) setMessages(doc.data()?.messages);
+        else setMessages([]);
+      });
+      return () => {
+        unSub();
+      };
+    }
+  }, [selectedChat]);
+
+  useEffect(() => {
+    bringLastMessageInFocus();
+  }, []);
+
+  const bringLastMessageInFocus = () => {
+    if (ref) ref.current?.scrollIntoView({ behavior: "smooth" });
+  };
+
+  if (selectedChat === "")
+    return (
+      <Flex
+        flex="1"
+        direction="column"
+        bg={useColorModeValue("gray.50", "gray.800")}
+        alignItems="center"
+        justifyContent="center"
+      >
+        <Heading size="md" fontWeight="normal">
+          No chat selected!
+        </Heading>
+      </Flex>
+    );
+
+  if (chats && !Object.keys(chats).includes(selectedChat))
+    return (
+      <Flex
+        flex="1"
+        direction="column"
+        bg={useColorModeValue("gray.50", "gray.800")}
+        alignItems="center"
+        justifyContent="center"
+      >
+        <Heading size="md" fontWeight="normal">
+          No such chat exists!
+        </Heading>
+      </Flex>
+    );
+
   return (
     <Flex
       flex="1"
@@ -21,26 +89,18 @@ const ChatWindow = ({}: Props) => {
     >
       <TopBar />
       <Flex flex="1" direction="column" overflowY="auto">
-        <ChatBubble
-          content="Lorem ipsum dolor sit amet consectetur adipisicing elit. Unde illum ducimus sapiente nostrum commodi earum vitae, perspiciatis reprehenderit, iure tempora dolorem quaerat nam et sed voluptates voluptatibus ab? Explicabo, quisquam consequatur. Ipsum amet perferendis saepe minima architecto exercitationem aut temporibus facere accusantium! Perferendis, ab similique excepturi dolores obcaecati minus eaque?"
-          rightSide={false}
-        />
-        <ChatBubble content="12" rightSide={false} />
-        <ChatBubble content="This is a dummy message" rightSide={true} />
-        <ChatBubble content="This is a dummy message" rightSide={false} />
-        <ChatBubble content="12" rightSide={false} />
-        <ChatBubble content="This is a dummy message" rightSide={true} />
-        <ChatBubble content="This is a dummy message" rightSide={false} />
-        <ChatBubble content="12" rightSide={false} />
-        <ChatBubble content="This is a dummy message" rightSide={true} />
-        <ChatBubble content="This is a dummy message" rightSide={false} />
-        <ChatBubble content="12" rightSide={false} />
-        <ChatBubble content="This is a dummy message" rightSide={true} />
-        <ChatBubble content="This is a dummy message" rightSide={false} />
-        <ChatBubble content="12" rightSide={false} />
-        <ChatBubble content="This is a dummy message" rightSide={true} />
+        {messages.map((message: any, index: number) => (
+          <ChatBubble
+            content={message?.text}
+            rightSide={currentUser?.uid === message?.senderId}
+            key={index}
+            // time = {`${message?.date?.toDate()}`}
+            time=""
+          />
+        ))}
+        <div ref={ref}></div>
       </Flex>
-      <BottomBar />
+      <BottomBar onSend={bringLastMessageInFocus} />
     </Flex>
   );
 };
@@ -48,6 +108,8 @@ const ChatWindow = ({}: Props) => {
 export default ChatWindow;
 
 const TopBar = () => {
+  const { selectedChat, chats } = useContext(ChatContext);
+
   return (
     <Flex
       bg={useColorModeValue("gray.50", "gray.800")}
@@ -58,31 +120,96 @@ const TopBar = () => {
       borderBottom="1px solid"
       borderColor={useColorModeValue("gray.200", "gray.500")}
     >
-      <Avatar src="" me="3" />
+      {/* <Avatar src="" me="3" /> */}{" "}
+      <Image
+        src={chats[selectedChat].photoURL}
+        alt="User image"
+        borderRadius="full"
+        h="12"
+        m="2"
+        w="12"
+        objectFit="cover"
+      />
       <Heading size="md" fontWeight="normal">
-        User name shows here
+        {chats[selectedChat].displayName}
       </Heading>
     </Flex>
   );
 };
 
-const BottomBar = () => {
+type IBottomBar = {
+  onSend: () => void;
+};
+
+const BottomBar = ({ onSend }: IBottomBar) => {
+  const [text, setText] = useState("");
+  const { chats, selectedChat } = useContext(ChatContext);
+  const [currentUser] = useContext(AuthContext);
+
+  const handleSend = async () => {
+    try {
+      if (text && currentUser) {
+        await updateDoc(doc(db, "chats", selectedChat), {
+          messages: arrayUnion({
+            id: uuid(),
+            text,
+            senderId: currentUser?.uid,
+            date: Timestamp.now(),
+          }),
+        });
+
+        await updateDoc(doc(db, "userChats", currentUser?.uid), {
+          [selectedChat]: {
+            ...chats[selectedChat],
+            lastMessage: text,
+            time: serverTimestamp(),
+          },
+        });
+
+        await updateDoc(doc(db, "userChats", chats[selectedChat]?.uid), {
+          [selectedChat]: {
+            uid: currentUser.uid,
+            displayName: currentUser.username,
+            photoURL: currentUser.photoURL,
+            lastMessage: text,
+            time: serverTimestamp(),
+          },
+        });
+      }
+      setText("");
+      onSend();
+    } catch (ex) {
+      console.log(ex);
+    }
+  };
+
   return (
-    <FormControl p="3" bg={useColorModeValue("initial", "gray.800")}>
-      <Flex
-        border="1px solid"
-        borderColor={useColorModeValue("gray.200", "gray.500")}
-        borderRadius="full"
-      >
-        <Input
-          placeholder="Type a message..."
-          borderWidth="0"
-          focusBorderColor="transparent"
-        />
-        <Button type="submit" borderEndRadius="full">
-          <AiOutlineSend />
-        </Button>
-      </Flex>
-    </FormControl>
+    <form
+      onSubmit={(e) => {
+        e.preventDefault();
+        handleSend();
+      }}
+    >
+      <FormControl p="3" bg={useColorModeValue("initial", "gray.800")}>
+        <Flex
+          border="1px solid"
+          borderColor={useColorModeValue("gray.200", "gray.500")}
+          borderRadius="full"
+        >
+          <Input
+            placeholder="Type a message..."
+            borderWidth="0"
+            focusBorderColor="transparent"
+            value={text}
+            onChange={(e) => {
+              setText(e.target.value);
+            }}
+          />
+          <Button type="submit" borderEndRadius="full">
+            <AiOutlineSend />
+          </Button>
+        </Flex>
+      </FormControl>
+    </form>
   );
 };

@@ -1,11 +1,12 @@
 import { Flex, Text, useColorModeValue } from "@chakra-ui/react";
 
-type Props = {
+type IChatBubble = {
   rightSide: boolean;
   content: string;
+  time: string;
 };
 
-const ChatBubble = ({ rightSide = false, content }: Props) => {
+const ChatBubble = ({ rightSide = false, content, time = "" }: IChatBubble) => {
   return (
     <Flex
       w="fit-content"
@@ -18,21 +19,27 @@ const ChatBubble = ({ rightSide = false, content }: Props) => {
       direction="column"
       textAlign="left"
     >
-        {/* <Text>Username</Text> */}
+      {/* <Text>Username</Text> */}
       <Flex
-        bg={rightSide ? useColorModeValue("green.100","green.400") : useColorModeValue("blue.100","blue.400")}
+        bg={
+          rightSide
+            ? useColorModeValue("green.100", "green.400")
+            : useColorModeValue("blue.100", "blue.400")
+        }
         w="full"
         p="3"
-        pe="5"
-        pb="5"
+        pe={time ? "5" : "3"}
+        pb={time ? "5" : "3"}
         borderRadius="lg"
         direction="column"
         position="relative"
       >
         <Text>{content}</Text>
-        <Text fontSize="xs" position="absolute" right="2" bottom="2">
-          Time here
-        </Text>
+        {time && (
+          <Text fontSize="xs" position="absolute" right="2" bottom="2">
+            {time}
+          </Text>
+        )}
       </Flex>
     </Flex>
   );
